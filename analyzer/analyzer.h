@@ -28,6 +28,8 @@ struct MsgStats {
 struct FieldDefinition {
   std::string name;
   std::string datatype;
+
+  size_t offset = 0;
 };
 
 struct MessageConfig {

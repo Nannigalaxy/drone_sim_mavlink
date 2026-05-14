@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "../decoder/decoder.h"
 #include "../message_definition/message_definition.h"
 
 extern "C" {
@@ -133,15 +134,22 @@ void Analyzer::process(Parser &parser) {
         autopilot = "PX4";
       }
     }
-
+    size_t current_offset = 0;
     // generic field tracking
     for (auto &field_def : cfg.sub) {
+      field_def.offset = current_offset;
+
+      current_offset += Decoder::get_type_size(field_def.datatype);
+
       FieldStats &field = stats[id].fields[field_def.name];
 
       field.name = field_def.name;
       field.datatype = field_def.datatype;
 
-      field.message_count++;
+      double value = Decoder::extract_field_value(msg, field_def.offset,
+                                                  field_def.datatype);
+
+      update_field_stats(field, value, field_def.datatype);
     }
   }
 

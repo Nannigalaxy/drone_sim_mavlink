@@ -13,6 +13,7 @@ add_executable(
 
     main.cpp
 
+    decoder/decoder.cpp
     parser/parser.cpp
     analyzer/analyzer.cpp
     report/report.cpp
@@ -34,6 +35,7 @@ target_include_directories(
     ${PROJECT_SOURCE_DIR}/external
     ${PROJECT_SOURCE_DIR}/external/tinyxml2
 
+    ${PROJECT_SOURCE_DIR}/decoder
     ${PROJECT_SOURCE_DIR}/parser
     ${PROJECT_SOURCE_DIR}/analyzer
     ${PROJECT_SOURCE_DIR}/report
