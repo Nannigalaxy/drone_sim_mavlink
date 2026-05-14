@@ -3,17 +3,21 @@
 #include <string>
 #include <vector>
 
-extern "C"
-{
+extern "C" {
 #include "../external/c_library_v2/common/mavlink.h"
 }
 
-class Parser
-{
+struct TelemetryMessage {
+  uint64_t timestamp_us = 0;
+
+  mavlink_message_t message;
+};
+
+class Parser {
 
 public:
-    std::vector<mavlink_message_t> messages;
-    size_t parse_errors = 0;
+  std::vector<TelemetryMessage> messages;
+  size_t parse_errors = 0;
 
-    void parse_file(const std::string &filename);
+  void parse_file(const std::string &filename);
 };

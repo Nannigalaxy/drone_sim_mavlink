@@ -44,12 +44,6 @@ int main(int argc, char *argv[]) {
 
     report.generate_json_report(analyzer, "report.json");
 
-    ReplayEngine replay;
-
-    replay.build_trajectory(parser);
-
-    replay.export_csv("replay.csv");
-
     std::cout << "Analysis completed" << std::endl;
   }
 
@@ -58,9 +52,7 @@ int main(int argc, char *argv[]) {
   else if (mode == "--replay") {
     ReplayEngine replay;
 
-    replay.build_trajectory(parser);
-
-    replay.playback_sitl_udp("127.0.0.1", 14550);
+    replay.playback_realtime(parser);
   }
 
   else {

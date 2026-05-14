@@ -95,7 +95,7 @@ void Analyzer::process(Parser &parser) {
   load_xml_definitions();
 
   for (auto &msg : parser.messages) {
-    int id = msg.msgid;
+    int id = msg.message.msgid;
 
     if (!config.count(id)) {
       continue;
@@ -116,17 +116,17 @@ void Analyzer::process(Parser &parser) {
     stats[id].count++;
 
     // MAVLink protocol version
-    if (msg.magic == MAVLINK_STX_MAVLINK1) {
+    if (msg.message.magic == MAVLINK_STX_MAVLINK1) {
       protocol = "MAVLink v1";
-    } else if (msg.magic == MAVLINK_STX) {
+    } else if (msg.message.magic == MAVLINK_STX) {
       protocol = "MAVLink v2";
     }
 
     // autopilot detection
-    if (msg.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
+    if (msg.message.msgid == MAVLINK_MSG_ID_HEARTBEAT) {
       mavlink_heartbeat_t hb;
 
-      mavlink_msg_heartbeat_decode(&msg, &hb);
+      mavlink_msg_heartbeat_decode(&msg.message, &hb);
 
       if (hb.autopilot == MAV_AUTOPILOT_ARDUPILOTMEGA) {
         autopilot = "ArduPilot";
@@ -146,7 +146,7 @@ void Analyzer::process(Parser &parser) {
       field.name = field_def.name;
       field.datatype = field_def.datatype;
 
-      double value = Decoder::extract_field_value(msg, field_def.offset,
+      double value = Decoder::extract_field_value(msg.message, field_def.offset,
                                                   field_def.datatype);
 
       update_field_stats(field, value, field_def.datatype);
