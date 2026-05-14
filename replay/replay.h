@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 
-#include "../analyzer/analyzer.h"
 #include "../message_definition/message_definition.h"
 #include "../parser/parser.h"
 

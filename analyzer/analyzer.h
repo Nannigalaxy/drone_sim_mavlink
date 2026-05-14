@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "../message_definition/message_definition.h"
 #include "../parser/parser.h"
 
 struct FieldStats {
@@ -23,18 +24,6 @@ struct MsgStats {
   std::string name;
   int count = 0;
   std::map<std::string, FieldStats> fields;
-};
-
-struct FieldDefinition {
-  std::string name;
-  std::string datatype;
-
-  size_t offset = 0;
-};
-
-struct MessageConfig {
-  std::string field;
-  std::vector<FieldDefinition> sub;
 };
 
 struct FieldExtractor {

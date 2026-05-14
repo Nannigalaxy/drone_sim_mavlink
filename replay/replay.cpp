@@ -10,70 +10,10 @@ extern "C" {
 #include "../external/c_library_v2/common/mavlink.h"
 }
 
-static void collect_messages(std::shared_ptr<XmlNode> node,
-                             std::map<int, MessageConfig> &config) {
-  if (!node) {
-    return;
-  }
-
-  if (node->name == "message") {
-    if (!node->attributes.count("id") || !node->attributes.count("name")) {
-      return;
-    }
-
-    int id = std::stoi(node->attributes["id"]);
-
-    MessageConfig msg;
-
-    msg.field = node->attributes["name"];
-
-    size_t current_offset = 0;
-
-    for (auto &child : node->children) {
-      if (child->name != "field") {
-        continue;
-      }
-
-      FieldDefinition field;
-
-      field.name = child->attributes["name"];
-
-      field.datatype = child->attributes["type"];
-
-      field.offset = current_offset;
-
-      current_offset += Decoder::get_type_size(field.datatype);
-
-      msg.sub.push_back(field);
-    }
-
-    config[id] = msg;
-  }
-
-  for (auto &child : node->children) {
-    collect_messages(child, config);
-  }
-}
-
-void ReplayEngine::load_message_definitions() {
-  XmlLoader loader;
-
-  auto root = loader.load(std::string(MAVLINK_XML_DIR) + "/common.xml");
-
-  if (!root) {
-    std::cerr << "Failed to load XML" << std::endl;
-
-    return;
-  }
-
-  collect_messages(root, config);
-
-  std::cout << "Loaded " << config.size() << " message definitions"
-            << std::endl;
-}
-
 void ReplayEngine::playback_realtime(Parser &parser) {
-  load_message_definitions();
+  MessageRegistry registry;
+
+  config = registry.get_config();
 
   if (parser.messages.empty()) {
     std::cout << "No MAVLink messages" << std::endl;

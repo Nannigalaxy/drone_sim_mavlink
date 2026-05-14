@@ -33,66 +33,10 @@ void update_field_stats(FieldStats &field, double value,
   field.observed_count++;
 }
 
-static void collect_messages(std::shared_ptr<XmlNode> node,
-                             std::map<int, MessageConfig> &config) {
-  if (!node) {
-    return;
-  }
-
-  // message node
-  if (node->name == "message") {
-    if (!node->attributes.count("id") || !node->attributes.count("name")) {
-      return;
-    }
-
-    int id = std::stoi(node->attributes["id"]);
-
-    MessageConfig msg;
-
-    msg.field = node->attributes["name"];
-
-    // collect fields
-    for (auto &child : node->children) {
-      if (child->name == "field") {
-        if (child->attributes.count("name")) {
-          FieldDefinition field_def;
-          field_def.name = child->attributes["name"];
-          field_def.datatype = child->attributes["type"];
-          msg.sub.push_back(field_def);
-        }
-      }
-    }
-
-    config[id] = msg;
-  }
-
-  // recurse
-  for (auto &child : node->children) {
-    collect_messages(child, config);
-  }
-}
-
-void Analyzer::load_xml_definitions() {
-  XmlLoader loader;
-
-  // TODO: support multiple XML files for different MAVLink versions
-  // for now we just load the common.xml which is shared across versions
-  auto root = loader.load(std::string(MAVLINK_XML_DIR) + "/common.xml");
-
-  if (!root) {
-    std::cerr << "Failed to load MAVLink XML" << std::endl;
-
-    return;
-  }
-
-  collect_messages(root, config);
-
-  std::cout << "Loaded " << config.size() << " MAVLink message definitions"
-            << std::endl;
-}
-
 void Analyzer::process(Parser &parser) {
-  load_xml_definitions();
+  MessageRegistry registry;
+
+  config = registry.get_config();
 
   for (auto &msg : parser.messages) {
     int id = msg.message.msgid;

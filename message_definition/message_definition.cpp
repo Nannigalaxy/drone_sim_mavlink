@@ -2,28 +2,18 @@
 
 #include <iostream>
 
+#include "../decoder/decoder.h"
+
 using namespace tinyxml2;
 
 std::shared_ptr<XmlNode> XmlLoader::load(const std::string &filename) {
   XMLDocument doc;
 
-  XMLError err = doc.LoadFile(filename.c_str());
-
-  if (err != XML_SUCCESS) {
-    std::cerr << "Failed to load XML: " << filename << std::endl;
-
+  if (doc.LoadFile(filename.c_str()) != XML_SUCCESS) {
     return nullptr;
   }
 
-  XMLElement *root = doc.RootElement();
-
-  if (!root) {
-    std::cerr << "No root element found\n";
-
-    return nullptr;
-  }
-
-  return parseElement(root);
+  return parseElement(doc.RootElement());
 }
 
 std::shared_ptr<XmlNode> XmlLoader::parseElement(XMLElement *elem) {
@@ -31,12 +21,10 @@ std::shared_ptr<XmlNode> XmlLoader::parseElement(XMLElement *elem) {
 
   node->name = elem->Name();
 
-  // text
   if (elem->GetText()) {
     node->text = elem->GetText();
   }
 
-  // attributes
   const XMLAttribute *attr = elem->FirstAttribute();
 
   while (attr) {
@@ -45,7 +33,6 @@ std::shared_ptr<XmlNode> XmlLoader::parseElement(XMLElement *elem) {
     attr = attr->Next();
   }
 
-  // children
   XMLElement *child = elem->FirstChildElement();
 
   while (child) {
@@ -57,21 +44,75 @@ std::shared_ptr<XmlNode> XmlLoader::parseElement(XMLElement *elem) {
   return node;
 }
 
-void printNode(std::shared_ptr<XmlNode> node, int depth) {
-  std::string indent(depth * 2, ' ');
-
-  std::cout << indent << "Tag: " << node->name << std::endl;
-
-  if (!node->text.empty()) {
-    std::cout << indent << "Text: " << node->text << std::endl;
+void MessageRegistry::collect_messages(std::shared_ptr<XmlNode> node) {
+  if (!node) {
+    return;
   }
 
-  for (auto &attr : node->attributes) {
-    std::cout << indent << "Attr: " << attr.first << " = " << attr.second
-              << std::endl;
+  if (node->name == "message") {
+    if (!node->attributes.count("id") || !node->attributes.count("name")) {
+      return;
+    }
+
+    int id = std::stoi(node->attributes["id"]);
+
+    MessageConfig msg;
+
+    msg.field = node->attributes["name"];
+
+    size_t current_offset = 0;
+
+    for (auto &child : node->children) {
+      if (child->name != "field") {
+        continue;
+      }
+
+      FieldDefinition field;
+
+      field.name = child->attributes["name"];
+
+      field.datatype = child->attributes["type"];
+
+      field.offset = current_offset;
+
+      current_offset += Decoder::get_type_size(field.datatype);
+
+      msg.sub.push_back(field);
+    }
+
+    config[id] = msg;
   }
 
   for (auto &child : node->children) {
-    printNode(child, depth + 1);
+    collect_messages(child);
   }
+}
+
+bool MessageRegistry::load_from_xml(const std::string &filename) {
+  XmlLoader loader;
+
+  auto root = loader.load(filename);
+
+  if (!root) {
+    return false;
+  }
+
+  collect_messages(root);
+
+  return true;
+}
+
+MessageRegistry::MessageRegistry() {
+  std::string path = std::string(MAVLINK_XML_DIR) + "/common.xml";
+
+  if (!load_from_xml(path)) {
+    std::cerr << "Failed to load MAVLink XML: " << path << std::endl;
+  } else {
+    std::cout << "Loaded " << config.size() << " MAVLink definitions"
+              << std::endl;
+  }
+}
+
+const std::map<int, MessageConfig> &MessageRegistry::get_config() const {
+  return config;
 }
