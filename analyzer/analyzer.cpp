@@ -1,13 +1,10 @@
 #include "analyzer.h"
 
-#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
 
-#include "../external/json.hpp"
-
-using json = nlohmann::json;
+#include "../message_definition/message_definition.h"
 
 extern "C"
 {
@@ -15,16 +12,17 @@ extern "C"
 }
 
 void update_field_stats(
-
-    FieldStats &field, double value, const std::string &datatype)
+    FieldStats& field,
+    double value,
+    const std::string& datatype)
 {
     field.datatype = datatype;
+
     field.message_count++;
 
     if (std::isnan(value))
     {
         field.null_count++;
-
         return;
     }
 
@@ -41,192 +39,90 @@ void update_field_stats(
     field.observed_count++;
 }
 
-void Analyzer::load_config(const std::string &filename)
+static void collect_messages(
+    std::shared_ptr<XmlNode> node,
+    std::map<int, MessageConfig>& config)
 {
-
-    std::ifstream file(filename);
-
-    if (!file.is_open())
+    if (!node)
     {
+        return;
+    }
 
-        std::cout << "Failed to open config" << std::endl;
+    // message node
+    if (node->name == "message")
+    {
+        if (!node->attributes.count("id") ||
+            !node->attributes.count("name"))
+        {
+            return;
+        }
+
+        int id =
+            std::stoi(node->attributes["id"]);
+
+        MessageConfig msg;
+
+        msg.field =
+            node->attributes["name"];
+
+        // collect fields
+        for (auto& child : node->children)
+        {
+            if (child->name == "field")
+            {
+                if (child->attributes.count("name"))
+                {
+                    msg.sub.push_back(
+                        child->attributes["name"]
+                    );
+                }
+            }
+        }
+
+        config[id] = msg;
+    }
+
+    // recurse
+    for (auto& child : node->children)
+    {
+        collect_messages(child, config);
+    }
+}
+
+void Analyzer::load_xml_definitions()
+{
+    XmlLoader loader;
+
+    // TODO: support multiple XML files for different MAVLink versions
+    // for now we just load the common.xml which is shared across versions
+    auto root = loader.load(
+        std::string(MAVLINK_XML_DIR) + "/common.xml"
+    );
+
+    if (!root)
+    {
+        std::cerr
+            << "Failed to load MAVLink XML"
+            << std::endl;
 
         return;
     }
 
-    json j;
-    file >> j;
+    collect_messages(root, config);
 
-    for (auto &item : j.items())
-    {
-        int msg_id = std::stoi(item.key());
-        MessageConfig cfg;
-        cfg.field = item.value()["field"];
-        cfg.sub = item.value()["sub"].get<std::vector<std::string>>();
-        config[msg_id] = cfg;
-    }
+    std::cout
+        << "Loaded "
+        << config.size()
+        << " MAVLink message definitions"
+        << std::endl;
 }
 
-void Analyzer::initialize_registry()
+void Analyzer::process(Parser& parser)
 {
+    load_xml_definitions();
 
-    // HEARTBEAT
-    registry["HEARTBEAT"]["type"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_heartbeat_t hb;
-
-            mavlink_msg_heartbeat_decode(&msg, &hb);
-
-            return (double)hb.type;
-        },
-
-        "uint8_t"};
-
-    registry["HEARTBEAT"]["autopilot"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_heartbeat_t hb;
-
-            mavlink_msg_heartbeat_decode(&msg, &hb);
-
-            return (double)hb.autopilot;
-        },
-
-        "uint8_t"};
-
-    registry["HEARTBEAT"]["base_mode"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_heartbeat_t hb;
-
-            mavlink_msg_heartbeat_decode(&msg, &hb);
-
-            return (double)hb.base_mode;
-        },
-
-        "uint8_t"};
-
-    registry["HEARTBEAT"]["custom_mode"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_heartbeat_t hb;
-
-            mavlink_msg_heartbeat_decode(&msg, &hb);
-
-            return (double)hb.custom_mode;
-        },
-
-        "uint32_t"};
-
-    registry["HEARTBEAT"]["system_status"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_heartbeat_t hb;
-
-            mavlink_msg_heartbeat_decode(&msg, &hb);
-
-            return (double)hb.system_status;
-        },
-
-        "uint8_t"};
-
-    // ATTITUDE
-
-    registry["ATTITUDE"]["roll"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_attitude_t att;
-
-            mavlink_msg_attitude_decode(&msg, &att);
-
-            return (double)att.roll;
-        },
-
-        "float"};
-
-    registry["ATTITUDE"]["pitch"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_attitude_t att;
-
-            mavlink_msg_attitude_decode(&msg, &att);
-
-            return (double)att.pitch;
-        },
-
-        "float"};
-
-    registry["ATTITUDE"]["yaw"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_attitude_t att;
-
-            mavlink_msg_attitude_decode(&msg, &att);
-
-            return (double)att.yaw;
-        },
-
-        "float"};
-
-    registry["ATTITUDE"]["rollspeed"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_attitude_t att;
-
-            mavlink_msg_attitude_decode(&msg, &att);
-
-            return (double)att.rollspeed;
-        },
-
-        "float"};
-
-    registry["ATTITUDE"]["pitchspeed"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_attitude_t att;
-
-            mavlink_msg_attitude_decode(&msg, &att);
-
-            return (double)att.pitchspeed;
-        },
-
-        "float"};
-
-    registry["ATTITUDE"]["yawspeed"] = {
-
-        [](const mavlink_message_t &msg)
-        {
-            mavlink_attitude_t att;
-
-            mavlink_msg_attitude_decode(&msg, &att);
-
-            return (double)att.yawspeed;
-        },
-
-        "float"};
-}
-
-void Analyzer::process(Parser &parser)
-{
-
-    initialize_registry();
-
-    load_config("../config/message_types_subcat_id.json");
-
-    for (auto &msg : parser.messages)
+    for (auto& msg : parser.messages)
     {
-
         int id = msg.msgid;
 
         if (!config.count(id))
@@ -234,70 +130,66 @@ void Analyzer::process(Parser &parser)
             continue;
         }
 
-        std::string msg_name = config[id].field;
+        auto& cfg = config[id];
 
-        if (stats.find(id) == stats.end())
+        // create stats entry
+        if (!stats.count(id))
         {
             MsgStats s;
+
             s.msg_id = id;
-            s.name = msg_name;
+            s.name = cfg.field;
+
             stats[id] = s;
         }
 
         stats[id].count++;
 
-        // protocol
-
+        // MAVLink protocol version
         if (msg.magic == MAVLINK_STX_MAVLINK1)
         {
-
             protocol = "MAVLink v1";
         }
         else if (msg.magic == MAVLINK_STX)
         {
-
             protocol = "MAVLink v2";
         }
 
-        // autopilot
-
+        // autopilot detection
         if (msg.msgid == MAVLINK_MSG_ID_HEARTBEAT)
         {
-
             mavlink_heartbeat_t hb;
 
-            mavlink_msg_heartbeat_decode(&msg, &hb);
+            mavlink_msg_heartbeat_decode(
+                &msg,
+                &hb
+            );
 
-            if (hb.autopilot == MAV_AUTOPILOT_ARDUPILOTMEGA)
+            if (hb.autopilot ==
+                MAV_AUTOPILOT_ARDUPILOTMEGA)
             {
-
                 autopilot = "ArduPilot";
             }
-            else if (hb.autopilot == MAV_AUTOPILOT_PX4)
+            else if (hb.autopilot ==
+                     MAV_AUTOPILOT_PX4)
             {
-
                 autopilot = "PX4";
             }
         }
 
-        for (auto &field_name : config[id].sub)
+        // generic field tracking
+        for (auto& field_name : cfg.sub)
         {
+            FieldStats& field =
+                stats[id].fields[field_name];
 
-            if (!registry[msg_name].count(field_name))
-            {
-                continue;
-            }
-
-            auto &extractor = registry[msg_name][field_name];
-
-            double value = extractor.extractor(msg);
-
-            FieldStats &field = stats[id].fields[field_name];
             field.name = field_name;
 
-            update_field_stats(field, value, extractor.datatype);
+            field.message_count++;
         }
     }
 
-    std::cout << "Analysis complete" << std::endl;
+    std::cout
+        << "Analysis complete"
+        << std::endl;
 }

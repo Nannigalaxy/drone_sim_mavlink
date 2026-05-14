@@ -55,6 +55,5 @@ public:
         registry;
 
     void process(Parser &parser);
-    void initialize_registry();
-    void load_config(const std::string &filename);
+    void load_xml_definitions();
 };
