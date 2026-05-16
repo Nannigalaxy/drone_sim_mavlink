@@ -1,62 +1,85 @@
 #include <iostream>
+#include <string>
 
 #include "analyzer/analyzer.h"
+#include "message_definition/message_definition.h"
 #include "parser/parser.h"
 #include "replay/replay.h"
 #include "report/report.h"
 
 int main(int argc, char *argv[]) {
+  if (argc < 4) {
+    std::cout << "Usage:\n\n"
 
-  if (argc < 3) {
+              << "./drone_sim_mavlink "
+              << "--analyze "
+              << "[--agg | --full] "
+              << "flight.tlog\n\n"
 
-    std::cout
+              << "./drone_sim_mavlink "
+              << "--replay "
+              << "flight.tlog"
 
-        << "Usage:\n"
-
-        << "./drone_adapter "
-        << "--analyze "
-        << "flight.tlog"
-
-        << std::endl;
+              << std::endl;
 
     return 1;
   }
 
   std::string mode = argv[1];
-  std::string file = argv[2];
 
   Parser parser;
 
-  std::cout << "Parsing telemetry..." << std::endl;
-
-  parser.parse_file(file);
-
-  std::cout << "Total messages parsed: " << parser.messages.size() << std::endl;
-
-  // ANALYZE
-
   if (mode == "--analyze") {
-    Analyzer analyzer;
+    std::string report_mode = argv[2];
+    std::string file = argv[3];
 
+    std::cout << "Parsing telemetry..." << std::endl;
+    parser.parse_file(file);
+
+    std::cout << "Total messages parsed: " << parser.messages.size()
+              << std::endl;
+
+    Analyzer analyzer;
     analyzer.process(parser);
 
     ReportGenerator report;
 
-    report.generate_json_report(analyzer, "report.json");
+    if (report_mode == "--agg") {
+      report.generate_json_report(analyzer, "report.json");
+      std::cout << "Aggregated report generated" << std::endl;
+    }
+
+    else if (report_mode == "--full") {
+      MessageRegistry registry;
+      report.export_csv_sheet(parser, registry, "full_report.csv");
+
+      std::cout << "Full CSV report generated" << std::endl;
+    }
+
+    else {
+      std::cout << "Unknown report mode" << std::endl;
+      return 1;
+    }
 
     std::cout << "Analysis completed" << std::endl;
   }
 
-  // REPLAY
-
   else if (mode == "--replay") {
-    ReplayEngine replay;
+    std::string file = argv[2];
 
+    std::cout << "Parsing telemetry..." << std::endl;
+    parser.parse_file(file);
+
+    std::cout << "Total messages parsed: " << parser.messages.size()
+              << std::endl;
+
+    ReplayEngine replay;
     replay.playback_realtime(parser);
   }
 
   else {
     std::cout << "Unknown mode" << std::endl;
+    return 1;
   }
 
   return 0;

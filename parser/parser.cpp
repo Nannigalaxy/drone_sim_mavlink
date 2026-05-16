@@ -8,6 +8,7 @@ extern "C" {
 }
 
 static uint64_t read_be_u64(const uint8_t *b) {
+  // read 8 bytes in big-endian order and convert to uint64_t
   return ((uint64_t)b[0] << 56) | ((uint64_t)b[1] << 48) |
          ((uint64_t)b[2] << 40) | ((uint64_t)b[3] << 32) |
          ((uint64_t)b[4] << 24) | ((uint64_t)b[5] << 16) |
@@ -28,6 +29,7 @@ void Parser::parse_file(const std::string &filename) {
 
   while (true) {
 
+    // buffer for timestamp (8 bytes) + MAVLink packet (up to 263 bytes)
     uint8_t tsbuf[8];
 
     file.read(reinterpret_cast<char *>(tsbuf), 8);
@@ -40,6 +42,8 @@ void Parser::parse_file(const std::string &filename) {
     bool packet_complete = false;
 
     while (!packet_complete && file.good()) {
+      // read one byte at a time and feed to MAVLink parser until a complete
+      // packet is parsed
       uint8_t byte;
       file.read(reinterpret_cast<char *>(&byte), 1);
 
@@ -47,12 +51,13 @@ void Parser::parse_file(const std::string &filename) {
         break;
       }
 
+      // feed byte to MAVLink parser
       if (mavlink_parse_char(MAVLINK_COMM_0, byte, &msg, &status)) {
         TelemetryMessage tm;
 
         tm.timestamp_us = timestamp_us;
         tm.message = msg;
-        messages.push_back(tm);
+        messages.push_back(tm); // store parsed message to use later in analysis
         packet_complete = true;
       }
 
