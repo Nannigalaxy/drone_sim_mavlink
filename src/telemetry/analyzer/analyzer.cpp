@@ -4,11 +4,11 @@
 #include <fstream>
 #include <iostream>
 
-#include "../decoder/decoder.h"
-#include "../message_definition/message_definition.h"
+#include "telemetry/decoder/decoder.h"
+#include "telemetry/message_definition/message_definition.h"
 
 extern "C" {
-#include "../external/c_library_v2/common/mavlink.h"
+#include "external/c_library_v2/common/mavlink.h"
 }
 
 void update_field_stats(FieldStats &field, double value,

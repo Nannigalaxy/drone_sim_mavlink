@@ -8,8 +8,8 @@
 #include <sstream>
 #include <vector>
 
-#include "../decoder/decoder.h"
-#include "../external/json.hpp"
+#include "external/json.hpp"
+#include "telemetry/decoder/decoder.h"
 
 using json = nlohmann::json;
 

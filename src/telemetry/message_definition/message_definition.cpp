@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "../decoder/decoder.h"
+#include "telemetry/decoder/decoder.h"
 
 using namespace tinyxml2;
 

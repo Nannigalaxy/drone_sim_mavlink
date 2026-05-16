@@ -4,10 +4,10 @@
 #include <iostream>
 #include <thread>
 
-#include "../decoder/decoder.h"
+#include "telemetry/decoder/decoder.h"
 
 extern "C" {
-#include "../external/c_library_v2/common/mavlink.h"
+#include "external/c_library_v2/common/mavlink.h"
 }
 
 void ReplayEngine::playback_realtime(Parser &parser) {

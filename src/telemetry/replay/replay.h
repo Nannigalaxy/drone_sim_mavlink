@@ -4,8 +4,8 @@
 #include <memory>
 #include <string>
 
-#include "../message_definition/message_definition.h"
-#include "../parser/parser.h"
+#include "telemetry/message_definition/message_definition.h"
+#include "telemetry/parser/parser.h"
 
 class ReplayEngine {
 public:

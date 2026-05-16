@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "../analyzer/analyzer.h"
-#include "../message_definition/message_definition.h"
-#include "../parser/parser.h"
+#include "telemetry/analyzer/analyzer.h"
+#include "telemetry/message_definition/message_definition.h"
+#include "telemetry/parser/parser.h"
 
 class ReportGenerator {
 public:

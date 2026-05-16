@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
 
-#include "analyzer/analyzer.h"
-#include "message_definition/message_definition.h"
-#include "parser/parser.h"
-#include "replay/replay.h"
-#include "report/report.h"
+#include "telemetry/analyzer/analyzer.h"
+#include "telemetry/message_definition/message_definition.h"
+#include "telemetry/parser/parser.h"
+#include "telemetry/replay/replay.h"
+#include "telemetry/report/report.h"
 
 int main(int argc, char *argv[]) {
   if (argc < 4) {

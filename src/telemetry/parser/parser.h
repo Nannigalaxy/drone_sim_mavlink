@@ -4,7 +4,7 @@
 #include <vector>
 
 extern "C" {
-#include "../external/c_library_v2/common/mavlink.h"
+#include "external/c_library_v2/common/mavlink.h"
 }
 
 struct TelemetryMessage {

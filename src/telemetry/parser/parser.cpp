@@ -4,7 +4,7 @@
 #include <iostream>
 
 extern "C" {
-#include "../external/c_library_v2/common/mavlink.h"
+#include "external/c_library_v2/common/mavlink.h"
 }
 
 static uint64_t read_be_u64(const uint8_t *b) {

@@ -1,52 +1,72 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(drone_sim_mavlink)
+project(
+    drone_sim_mavlink
+    VERSION 1.0
+    DESCRIPTION "A MAVLink telemetry replay, analysis and simulation tool"
+)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Executable
+#
+# Source Files
+#
 
-add_executable(
+set(TELEMETRY_SRC
 
-    drone_sim_mavlink
+    src/telemetry/parser/parser.cpp
+    src/telemetry/decoder/decoder.cpp
+    src/telemetry/message_definition/message_definition.cpp
+    src/telemetry/replay/replay.cpp
+    src/telemetry/analyzer/analyzer.cpp
+    src/telemetry/report/report.cpp
+)
 
-    main.cpp
-
-    decoder/decoder.cpp
-    parser/parser.cpp
-    analyzer/analyzer.cpp
-    report/report.cpp
-    replay/replay.cpp
-
-    message_definition/message_definition.cpp
+set(EXTERNAL_SRC
 
     external/tinyxml2/tinyxml2.cpp
 )
 
+#
+# Main Executable
+#
+
+add_executable(
+
+    replay_app
+
+    apps/main.cpp
+
+    ${TELEMETRY_SRC}
+    ${EXTERNAL_SRC}
+)
+
+#
 # Include Directories
+#
 
 target_include_directories(
-    drone_sim_mavlink
+
+    replay_app
+
     PRIVATE
 
     ${PROJECT_SOURCE_DIR}
-
+    ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/external
     ${PROJECT_SOURCE_DIR}/external/tinyxml2
-
-    ${PROJECT_SOURCE_DIR}/decoder
-    ${PROJECT_SOURCE_DIR}/parser
-    ${PROJECT_SOURCE_DIR}/analyzer
-    ${PROJECT_SOURCE_DIR}/report
-    ${PROJECT_SOURCE_DIR}/replay
-    ${PROJECT_SOURCE_DIR}/message_definition
 )
 
-# XML Runtime Path
+#
+# MAVLink XML Path
+#
 
 target_compile_definitions(
-    drone_sim_mavlink
+
+    replay_app
+
     PRIVATE
+
     MAVLINK_XML_DIR="${PROJECT_SOURCE_DIR}/external/mavlink/message_definition/v1.0"
 )

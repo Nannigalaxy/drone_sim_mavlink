@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "../message_definition/message_definition.h"
-#include "../parser/parser.h"
+#include "telemetry/message_definition/message_definition.h"
+#include "telemetry/parser/parser.h"
 
 struct FieldStats {
   std::string name;
