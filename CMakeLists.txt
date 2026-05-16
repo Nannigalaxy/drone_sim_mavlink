@@ -21,6 +21,8 @@ set(TELEMETRY_SRC
     src/telemetry/replay/replay.cpp
     src/telemetry/analyzer/analyzer.cpp
     src/telemetry/report/report.cpp
+    src/telemetry/connector/file.cpp
+    src/telemetry/connector/udp.cpp
 )
 
 set(EXTERNAL_SRC

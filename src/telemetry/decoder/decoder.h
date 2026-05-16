@@ -8,8 +8,11 @@ extern "C" {
 }
 
 class Decoder {
-public:
-  static size_t get_type_size(const std::string &type);
-  static double extract_field_value(const mavlink_message_t &msg, size_t offset,
-                                    const std::string &type);
+  public:
+    static size_t get_type_size(const std::string &type);
+    static double extract_field_value(
+        const mavlink_message_t &msg,
+        size_t offset,
+        const std::string &type
+    );
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <map>
 #include <memory>
 #include <string>
@@ -8,11 +9,18 @@
 #include "telemetry/parser/parser.h"
 
 class ReplayEngine {
-public:
-  void load_message_definitions();
+  public:
+    ReplayEngine();
+    void load_message_definitions();
 
-  void playback_realtime(Parser &parser);
+    void playback_realtime(Parser &parser);
+    void process_message(const TelemetryMessage &msg);
 
-private:
-  std::map<int, MessageConfig> config;
+  private:
+    bool first_message_ = true;
+
+    uint64_t first_log_timestamp_ = 0;
+
+    std::chrono::steady_clock::time_point wall_start_;
+    std::map<int, MessageConfig> config;
 };
