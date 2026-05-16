@@ -9,9 +9,18 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(OpenCV REQUIRED)
+
 #
 # Source Files
 #
+
+set(VIDEO_SRC
+
+    src/video/processor/frame_overlay.cpp
+    src/video/connector/rtsp.cpp
+    src/video/render/render.cpp
+)
 
 set(TELEMETRY_SRC
 
@@ -44,6 +53,15 @@ add_executable(
     ${EXTERNAL_SRC}
 )
 
+add_executable(
+
+    video_app
+
+    apps/video_main.cpp
+
+    ${VIDEO_SRC}
+)
+
 #
 # Include Directories
 #
@@ -58,6 +76,26 @@ target_include_directories(
     ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/external
     ${PROJECT_SOURCE_DIR}/external/tinyxml2
+)
+
+target_include_directories(
+
+    video_app
+
+    PRIVATE
+
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/src
+)
+
+
+target_link_libraries(
+
+    video_app
+
+    PRIVATE
+
+    ${OpenCV_LIBS}
 )
 
 #
