@@ -2,6 +2,8 @@
 
 Drone telemetry replay and MAVLink analysis framework written in C++.
 
+Analyzes all messages from MAVlink definition. can add custom messages and format in `external/mavlink/message_definition/`  
+
 ---
 
 ## Build
