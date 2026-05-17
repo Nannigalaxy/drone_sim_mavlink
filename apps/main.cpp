@@ -17,7 +17,7 @@ static void print_usage() {
         << "Usage:\n\n"
 
         << "./replay_app "
-        << "--analyze-agg "
+        << "--analyze-summary "
         << "--file flight.tlog\n\n"
 
         << "./replay_app "
@@ -107,16 +107,16 @@ int main(int argc, char *argv[]) {
         ReportGenerator report;
         MessageRegistry registry;
 
-        report.export_csv_sheet(store, registry, "full_report.csv");
+        report.export_csv_sheet(store, registry, "full_log.csv");
 
         std::cout << "Full CSV report generated" << std::endl;
     }
 
-    else if (mode == "--analyze-agg") {
+    else if (mode == "--analyze-summary") {
         ReportGenerator report;
-        report.generate_json_report(analyzer, "report.json");
+        report.generate_json_report(analyzer, "summary_report.json");
 
-        std::cout << "Aggregated report generated" << std::endl;
+        std::cout << "Summary report generated" << std::endl;
     }
 
     else if (mode == "--replay") {
