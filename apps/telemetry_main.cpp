@@ -107,14 +107,14 @@ int main(int argc, char *argv[]) {
         ReportGenerator report;
         MessageRegistry registry;
 
-        report.export_csv_sheet(store, registry, "full_log.csv");
+        report.export_csv_sheet(store, registry, "output/full_log.csv");
 
         std::cout << "Full CSV report generated" << std::endl;
     }
 
     else if (mode == "--analyze-summary") {
         ReportGenerator report;
-        report.generate_json_report(analyzer, "summary_report.json");
+        report.generate_json_report(analyzer, "output/summary_report.json");
 
         std::cout << "Summary report generated" << std::endl;
     }
