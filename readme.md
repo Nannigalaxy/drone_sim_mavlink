@@ -183,3 +183,10 @@ rtsp://127.0.0.1:8554/live
 ```
 
 ---
+
+### Docker
+To run E2E demo
+
+```bash
+docker compose -f compose-demo.yaml up --build 
+```
