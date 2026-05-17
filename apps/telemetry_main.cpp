@@ -16,19 +16,19 @@ static void print_usage() {
 
         << "Usage:\n\n"
 
-        << "./replay_app "
+        << "./telemetry_app "
         << "--analyze-summary "
         << "--file flight.tlog\n\n"
 
-        << "./replay_app "
+        << "./telemetry_app "
         << "--analyze-full "
         << "--file flight.tlog\n\n"
 
-        << "./replay_app "
+        << "./telemetry_app "
         << "--replay "
         << "--file flight.tlog\n\n"
 
-        << "./replay_app "
+        << "./telemetry_app "
         << "--replay "
         << "--udp 14550 [bind_ip]\n"
 
