@@ -1,38 +1,91 @@
-# Drone Sim Mavlink
-> Project is currently under development.
+# drone_sim_mavlink
 
+Drone telemetry replay and MAVLink analysis framework written in C++.
 
-![TLog path validation](docs/screenshot/uavlog_validation.png)
-^ validating tlog
+## Features
 
-![SITL+Gazebo setup](docs/screenshot/sim1.png)
-^ SITL and Gazebo setup
+- Replay `.tlog` telemetry logs
+- Analyze MAVLink telemetry packets
+- Simulate live telemetry over UDP
+- RTSP video stream viewer
+- MAVLink v1/v2 support
+- PX4 and ArduPilot compatible
 
+---
 
-
-# TLog Parser and Replay
-> (!) GPS path replay in development
-
-## Build Instructions
+## Build
 
 ```bash
 mkdir build
 cd build
 cmake ..
-make
+make -j$(nproc)
 ```
 
-Usage:
+---
+
+## Telemetry Commands
+
+### Analyze Summary
+
 ```bash
-./drone_sim_mavlink --analyze input/test_flight_tail1.tlog
+./telemetry_app \
+  --analyze-summary \
+  --file flight.tlog
 ```
 
+### Full Analysis
 
-## Configuration
+```bash
+./telemetry_app \
+  --analyze-full \
+  --file flight.tlog
+```
 
-Telemetry message fields are configured through:
+### Replay `.tlog`
+
+```bash
+./telemetry_app \
+  --replay \
+  --file flight.tlog
+```
+
+### Replay Over UDP
+
+```bash
+./telemetry_app \
+  --replay \
+  --udp 14550 [bind_ip]
+```
+
+---
+
+## RTSP Video Viewer
+
+```bash
+./video_app
+```
+
+Default stream:
 
 ```text
-config/message_types_subcat_id.json
+rtsp://127.0.0.1:8554/live
 ```
-Source ref: https://mavlink.io/en/messages/common.html
+
+---
+
+## Docker
+
+```bash
+docker build -t drone_sim_mavlink .
+```
+
+---
+
+## Supported
+
+- MAVLink v1/v2
+- PX4
+- ArduPilot
+- UDP telemetry
+- RTSP video streams
