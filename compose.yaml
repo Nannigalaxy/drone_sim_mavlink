@@ -1,0 +1,50 @@
+networks:
+  mavlink_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+  rtsp_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
+
+x-base: &base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+
+services:
+
+  telemetry:
+    <<: *base
+    container_name: drone_telemetry
+    networks:
+      mavlink_net:
+        ipv4_address: 172.20.0.30 # Assign a static IP for telemetry service
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+    ports:
+      - "14550:14550/udp"
+    working_dir: /app
+    entrypoint: ["./build/telemetry_app"] # Override entrypoint to run the telemetry application
+    volumes:
+      - ./output:/app/output
+      
+  video_viewer:
+    <<: *base
+    container_name: drone_video_viewer
+    networks:
+      rtsp_net:
+        ipv4_address: 172.21.0.40 # Assign a static IP for video viewer service
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+    working_dir: /app
+    environment:
+      - DISPLAY=${DISPLAY:-}
+      - RTSP_URL=rtsp://172.21.0.10:8554/live
+    entrypoint: ["./build/video_app"] # Override entrypoint to run the video viewer application
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
