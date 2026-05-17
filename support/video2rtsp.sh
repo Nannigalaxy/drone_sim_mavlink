@@ -12,10 +12,10 @@ set -e
 # Usage:
 #
 #   Webcam mode:
-#       ./run_rtsp.sh webcam
+#       ./video2rtsp.sh webcam
 #
 #   Local video file mode:
-#       ./run_rtsp.sh file sample.mp4
+#       ./video2rtsp.sh file sample.mp4
 #
 # Test stream:
 #       ffplay rtsp://127.0.0.1:8554/live
@@ -30,9 +30,6 @@ set -e
 #
 # Install ffmpeg:
 #       sudo apt install ffmpeg
-#
-# Download MediaMTX:
-#       https://github.com/bluenviron/mediamtx
 #
 # ============================================================
 
