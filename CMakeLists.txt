@@ -11,9 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenCV REQUIRED)
 
-#
+
 # Source Files
-#
 
 set(VIDEO_SRC
 
@@ -39,15 +38,14 @@ set(EXTERNAL_SRC
     external/tinyxml2/tinyxml2.cpp
 )
 
-#
+
 # Main Executable
-#
 
 add_executable(
 
-    replay_app
+    telemetry_app
 
-    apps/main.cpp
+    apps/telemetry_main.cpp
 
     ${TELEMETRY_SRC}
     ${EXTERNAL_SRC}
@@ -62,13 +60,12 @@ add_executable(
     ${VIDEO_SRC}
 )
 
-#
+
 # Include Directories
-#
 
 target_include_directories(
 
-    replay_app
+    telemetry_app
 
     PRIVATE
 
@@ -98,13 +95,12 @@ target_link_libraries(
     ${OpenCV_LIBS}
 )
 
-#
+
 # MAVLink XML Path
-#
 
 target_compile_definitions(
 
-    replay_app
+    telemetry_app
 
     PRIVATE
 
