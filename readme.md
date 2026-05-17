@@ -2,15 +2,6 @@
 
 Drone telemetry replay and MAVLink analysis framework written in C++.
 
-## Features
-
-- Replay `.tlog` telemetry logs
-- Analyze MAVLink telemetry packets
-- Simulate live telemetry over UDP
-- RTSP video stream viewer
-- MAVLink v1/v2 support
-- PX4 and ArduPilot compatible
-
 ---
 
 ## Build
@@ -128,9 +119,56 @@ TIME: 40455376743
   ...
 ```
 
+## Telemetry Simulator
+
+Inside `support/`:
+
+```bash
+python3 tlog2udp.py ./flight.tlog
+```
+
+Optional:
+
+```bash
+python3 tlog2udp.py ./flight.tlog 127.0.0.1 14550
+```
+
+
 ---
 
 ## RTSP Video Viewer
+
+Start RTSP stream helper from `support/`:
+
+### Webcam Stream
+
+```bash
+./video2rtsp.sh webcam
+```
+
+### Video File Stream
+
+```bash
+./video2rtsp.sh file sample.mp4
+```
+
+Requirements:
+
+```bash
+sudo apt install ffmpeg
+```
+
+Requires:
+- ffmpeg
+- mediamtx (included in support/)
+
+Test stream:
+
+```bash
+ffplay rtsp://127.0.0.1:8554/live
+```
+
+Then run:
 
 ```bash
 ./video_app
@@ -143,19 +181,3 @@ rtsp://127.0.0.1:8554/live
 ```
 
 ---
-
-## Docker
-
-```bash
-docker build -t drone_sim_mavlink .
-```
-
----
-
-## Supported
-
-- MAVLink v1/v2
-- PX4
-- ArduPilot
-- UDP telemetry
-- RTSP video streams
