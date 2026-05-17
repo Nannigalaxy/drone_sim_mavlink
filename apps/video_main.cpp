@@ -5,7 +5,9 @@
 #include "video/render/render.h"
 
 int main() {
-    std::string rtsp_url = "rtsp://127.0.0.1:8554/live";
+    const char *env = std::getenv("RTSP_URL");
+
+    std::string rtsp_url = env ? env : "rtsp://127.0.0.1:8554/live";
 
     RtspConnector connector(rtsp_url);
 
@@ -25,8 +27,7 @@ int main() {
             break;
         }
 
-        cv::Mat processed =
-            overlay.process(frame);
+        cv::Mat processed = overlay.process(frame);
 
         visualizer.show(processed);
 
